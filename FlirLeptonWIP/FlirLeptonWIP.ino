@@ -16,6 +16,11 @@ byte x = 0;
 #define VOSPI_FRAME_SIZE (164)
 byte lepton_frame_packet[VOSPI_FRAME_SIZE];
 
+bool runonce = 0;
+
+word maxval = 0;
+word minval = 99999;
+
 int image_index;
 #define image_x (80)
 #define image_y (60)
@@ -51,12 +56,12 @@ int spi_read_word(int data)
   return read_data;
 }
 
-inline void digitalWriteDirect(int pin, boolean val){
-  if(val) g_APinDescription[pin].pPort -> PIO_SODR = g_APinDescription[pin].ulPin;
+inline void digitalWriteDirect(int pin, boolean val) {
+  if (val) g_APinDescription[pin].pPort -> PIO_SODR = g_APinDescription[pin].ulPin;
   else    g_APinDescription[pin].pPort -> PIO_CODR = g_APinDescription[pin].ulPin;
 }
 
-inline int digitalReadDirect(int pin){
+inline int digitalReadDirect(int pin) {
   return !!(g_APinDescription[pin].pPort -> PIO_PDSR & g_APinDescription[pin].ulPin);
 }
 
@@ -74,33 +79,103 @@ void read_lepton_frame(void)
   }
 }
 
+bool donecapturing = 0;
+
+
+
 void buffer_image(void)
 {
   int j = lepton_frame_packet[1];
   for (int i = 0; i < image_x; i++)
   {
-    image[i][j] = ((lepton_frame_packet[2*i+4] << 8) + lepton_frame_packet[2*i+5]);//-0x1000;
+    image[i][j] = ((lepton_frame_packet[2 * i + 4] << 8) + lepton_frame_packet[2 * i + 5]); //-0x1000;
   }
-  // Serial.print("d");
-  if (j == 0x3B) print_image();
+  if (j == 0x3B) {
+    print_image();
+    scale_image();
+    donecapturing = 1;
+  }
 }
 
-void print_image(void)
+int scale(int num) {
+
+  int val = maxval - minval;
+  float val2 = val / 255.0;
+
+  // Serial.print(val,DEC);
+  //Serial.print(" ");
+  // Serial.print((float)val2);
+  //  Serial.print(" ");
+
+  int ret = (((num - minval) * (255.0 - 0.0)) / (maxval - minval)) + 0.0;
+
+
+  //float retval = (num / val2);
+  // Serial.print(ret,DEC);
+  return ret;
+}
+/*
+int scale(int num) {
+  //Serial.print("R");
+  //Serial.print(num,DEC);
+  int val = maxval-minval;
+  float val2 = val/255.0;
+
+  Serial.print(val,DEC);
+  Serial.print(" ");
+  Serial.print((float)val2);
+   Serial.print(" ");
+
+   float ret = (num/((maxval-minval)/(255.0-0.0)))+0.0;
+
+
+  //float retval = (num / val2);
+  Serial.print(ret,DEC);
+  return ret;
+}
+*/
+void scale_image(void)
 {
-  int count = 0;
- 
   for (int j = 0; j < image_y; j++)
   {
     for (int i = 0; i < image_x; i++)
     {
-      count++;
-    //  Serial.print(image[i][j],HEX);
-  //    Serial.print(",");
+      int num = scale(image[i][j]);
+      //Serial.print(image[i][j],DEC);
+      Serial.print(num, DEC);
+      Serial.print(" ");
+      //  Serial.print(" ");
     }
   }
-  
- // Serial.print(count);
-  Serial.println(" ");
+  Serial.println();
+}
+
+void print_image(void)
+{
+  for (int j = 0; j < image_y; j++)
+  {
+    for (int i = 0; i < image_x; i++)
+    {
+
+      if (image[i][j] < minval)
+        minval = image[i][j];
+
+      if (image[i][j] > maxval)
+        maxval = image[i][j];
+
+      //     Serial.print(image[i][j],DEC);
+      //     Serial.print(" ");
+    }
+  }
+  // Serial.println(" ");
+  runonce = 1;
+
+  //Serial.println("PRINTLN");
+  // Serial.println("Min/Max: ");
+  // Serial.print(minval);
+  //  Serial.print(" ");
+  //  Serial.print(maxval);
+  //  Serial.println();
 }
 
 
@@ -133,7 +208,7 @@ void print_lepton_frame(void)
   int i;
   for (i = 0; i < (VOSPI_FRAME_SIZE); i++)
   {
-    Serial.print(lepton_frame_packet[i], DEC);
+    Serial.print(lepton_frame_packet[i], HEX);
     Serial.print(",");
   }
   Serial.println(" ");
@@ -247,80 +322,102 @@ int read_data()
 
 }
 
-
-void loop()
-{
-  int i;
-  int reading = 0;
-  String debugString;
-  Serial.println("beginTransmission");
-
-  set_reg(0);
-
-  read_reg(0x0);
-
-  read_reg(0x2);
-
-  Serial.println("SYS Camera Customer Serial Number");
-  lepton_command(SYS, 0x28 >> 2 , GET);
-  read_data();
-
-  Serial.println("SYS Flir Serial Number");
-  lepton_command(SYS, 0x2 , GET);
-  read_data();
-
-  Serial.println("SYS Camera Uptime");
-  lepton_command(SYS, 0x0C >> 2 , GET);
-  read_data();
-
-  Serial.println("SYS Fpa Temperature Kelvin");
-  lepton_command(SYS, 0x14 >> 2 , GET);
-  read_data();
-
-  Serial.println("SYS Aux Temperature Kelvin");
-  lepton_command(SYS, 0x10 >> 2 , GET);
-  read_data();
-
-  Serial.println("OEM Chip Mask Revision");
-  lepton_command(OEM, 0x14 >> 2 , GET);
-  read_data();
-
-  //Serial.println("OEM Part Number");
-  //lepton_command(OEM, 0x1C >> 2 , GET);
-  //read_data();
-
-  Serial.println("OEM Camera Software Revision");
-  lepton_command(OEM, 0x20 >> 2 , GET);
-  read_data();
-
-  Serial.println("AGC Enable");
-  //lepton_command(AGC, 0x01  , SET);
-  agc_enable();
-  read_data();
-
-  Serial.println("AGC READ");
-  lepton_command(AGC, 0x00  , GET);
-  read_data();
-
-  Serial.println("SYS Telemetry Enable State");
-  lepton_command(SYS, 0x19>>2 ,GET);
-  read_data();
-
-  while (1)
+void captureimage() {
+  //Serial.print("DD");
+  while (donecapturing == 0)
   {
-    //lepton_sync();
+    // lepton_sync();
     read_lepton_frame();
-   // if(lepton_frame_packet[0]&0x0f == 0x0f )
+    // if(lepton_frame_packet[0]&0x0f == 0x0f )
     {
-    //  print_lepton_frame();
-   //   Serial.print(lepton_frame_packet[1],DEC);  
-    //  Serial.println(" ");
-    
+      // print_lepton_frame();
+      // Serial.print(lepton_frame_packet[1],HEX);
+      // Serial.println(" ");
       buffer_image();
+      // scale_image();
     }
 
   }
-  x++;
-  delay(10000);
+//Serial.print("DD");
+}
+
+void loop()
+{
+
+  if (runonce == 6) {
+    int i;
+    int reading = 0;
+    String debugString;
+    Serial.println("beginTransmission");
+
+    //set_reg(0);
+
+    //read_reg(0x0);
+
+    read_reg(0x2);
+
+    Serial.println("SYS Camera Customer Serial Number");
+    lepton_command(SYS, 0x28 >> 2 , GET);
+    read_data();
+
+    Serial.println("SYS Flir Serial Number");
+    lepton_command(SYS, 0x2 , GET);
+    read_data();
+
+    Serial.println("SYS Camera Uptime");
+    lepton_command(SYS, 0x0C >> 2 , GET);
+    read_data();
+
+    Serial.println("SYS Fpa Temperature Kelvin");
+    lepton_command(SYS, 0x14 >> 2 , GET);
+    read_data();
+
+    Serial.println("SYS Aux Temperature Kelvin");
+    lepton_command(SYS, 0x10 >> 2 , GET);
+    read_data();
+
+    Serial.println("OEM Chip Mask Revision");
+    lepton_command(OEM, 0x14 >> 2 , GET);
+    read_data();
+
+    //Serial.println("OEM Part Number");
+    //lepton_command(OEM, 0x1C >> 2 , GET);
+    //read_data();
+
+    Serial.println("OEM Camera Software Revision");
+    lepton_command(OEM, 0x20 >> 2 , GET);
+    read_data();
+
+    Serial.println("AGC Enable");
+    //lepton_command(AGC, 0x01  , SET);
+    agc_enable();
+    read_data();
+
+    Serial.println("AGC READ");
+    lepton_command(AGC, 0x00  , GET);
+    read_data();
+
+    //Serial.println("SYS Telemetry Enable State");
+    //lepton_command(SYS, 0x19>>2 ,GET);
+    //read_data();
+  }
+//lepton_sync();
+delay(5000);
+ // lepton_sync();
+  while(1){
+ //   delay(1000);
+  //captureimage();
+
+   read_lepton_frame();
+    // if(lepton_frame_packet[0]&0x0f == 0x0f )
+    {
+      // print_lepton_frame();
+      // Serial.print(lepton_frame_packet[1],HEX);
+      // Serial.println(" ");
+      buffer_image();
+  }
+//Serial.println("it");
+  //x++;
+  }
 }
 
