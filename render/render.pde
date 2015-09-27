@@ -99,7 +99,7 @@ color hsv2rgb(int huein)
 void setup() {
   size(640, 480);
 
-  String lines[] = loadStrings("output3.txt"); 
+  String lines[] = loadStrings("output.txt"); 
 
   String image = "";
   for (int i = 0; i < lines.length; i++) {
