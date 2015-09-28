@@ -422,11 +422,13 @@ void loop()
  // return;
   // lepton_sync();
   if(state == HIGH){
-    state = LOW;
-    donecapturing = 0;
+  
 
-lepton_sync();
-    delay(2500);
+//lepton_sync();
+//delay(500);
+   // delay(2500);
+      state = LOW;
+    donecapturing = 0;
   while (donecapturing == 0) {
     //   delay(1000);
     //captureimage();
