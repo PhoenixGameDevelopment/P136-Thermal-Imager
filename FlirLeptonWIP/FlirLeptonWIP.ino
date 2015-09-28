@@ -407,7 +407,7 @@ void loop()
     {
 
 
-      buttonState = digitalRead(saveimagepin);
+    //  buttonState = digitalRead(saveimagepin);
       /*
       if (buttonState != lastbuttonState && buttonState == HIGH) {      
         Serial.println("SAVING IMAGE");
