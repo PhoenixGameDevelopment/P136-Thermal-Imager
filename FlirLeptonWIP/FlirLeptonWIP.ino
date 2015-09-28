@@ -48,6 +48,8 @@ void setup()
 
   pinMode(saveimagepin, INPUT);
 
+  attachInterrupt(digitalPinToInterrupt(7),saveimage,RISING);
+
   Serial.println("setup complete");
 
 
@@ -138,7 +140,7 @@ void read_lepton_frame(void)
 
 bool donecapturing = 0;
 
-
+bool savenewimage = 0;
 
 void buffer_image(void)
 {
@@ -147,10 +149,11 @@ void buffer_image(void)
   {
     image[i][j] = ((lepton_frame_packet[2 * i + 4] << 8) + lepton_frame_packet[2 * i + 5]); //-0x1000;
   }
-  if (j == 0x3B) {
+  if (j == 0x3B ){//&& savenewimage == 1) {
     print_image();
     scale_image();
     donecapturing = 1;
+    savenewimage = 1;
   }
 }
 
@@ -392,12 +395,39 @@ void captureimage() {
 }
 
 
+volatile int state = LOW;
+
+void saveimage(){
+
+ Serial.println("SAVING IMAGE");
+
+state = HIGH;
+ //  while (1) {
+
+  //  read_lepton_frame();
+
+
+ //buffer_image();
+
+
+ // }
+
+}
+
+
 void loop()
 {
   //lepton_sync();
   delay(2500);
+ // return;
   // lepton_sync();
-  while (1) {
+  if(state == HIGH){
+    state = LOW;
+    donecapturing = 0;
+
+lepton_sync();
+    delay(2500);
+  while (donecapturing == 0) {
     //   delay(1000);
     //captureimage();
 
@@ -418,6 +448,7 @@ void loop()
  buffer_image();
 
     }
+  }
   }
 }
 
