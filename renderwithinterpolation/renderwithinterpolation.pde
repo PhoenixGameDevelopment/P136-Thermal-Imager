@@ -110,6 +110,7 @@ void renderrawimage() {
 
     for (int j = 0; j < 60; j++) {
 
+      int col = rawarray[i][j];
       
      color c =  hsv2rgb(col);
             
@@ -133,7 +134,60 @@ void renderrawimage() {
   }
 }
 
+void populateinterpolatedarray(){
+  
+  for (int i = 0; i < 80*2; i+=2) {
+
+    for (int j = 0; j < 60*2; j+=2) {
+
+      int col = rawarray[i][j];
+      
+      interpolatedarray[i][j] = col;
+       interpolatedarray[i+1][j+1] = 255;
+      
+      
+     color c =  hsv2rgb(col);
+
+    }
+}
+}
+
   void renderinterpolatedimage() {
+     //first, populate the interpolated array:
+        populateinterpolatedarray();
+        
+    int xpos = 0;
+    int ypos = 0;
+    
+ 
+    
+  for (int i = 0; i < 80*2; i++) {
+
+    for (int j = 0; j < 60*2; j++) {
+
+      int col = interpolatedarray[i][j];
+      
+     color c =  hsv2rgb(col);
+            
+      noStroke(); //prevents visible borders on squares
+
+      fill(c);
+      // println(col);
+
+      rect(xpos, ypos, 4, 4);
+
+      xpos+=incamount;
+
+      if (xpos >=(80*incamount)) {
+        xpos = 0;
+        ypos+=incamount;
+      }
+
+      if (ypos >= (60*incamount))
+        ypos = 0;
+    }
+  }
+     
   }
 
   void setup() {
@@ -160,7 +214,7 @@ int ypos = 0;
       
       int col = dataasint[count];
       
-      
+      rawarray[i][j] = col;
       
       count++;
       
@@ -168,6 +222,8 @@ int ypos = 0;
     
   }
 
+//renderrawimage();
+renderinterpolatedimage();
   //  for (int i : dataasint) {   
       // }
       
