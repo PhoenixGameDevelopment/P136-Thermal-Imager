@@ -41,50 +41,50 @@ color hsv2rgb(int huein)
 
   switch(i) {
   case 0:
-    print("0");
-    print(" ");
-    print(r);
-    print(" ");
-    print(g);
-    print(" ");
-    print(b);
-    print(" ");
-    print(h);
-    print(" ");
-    print(huein);
+    //   print("0");
+    //   print(" ");
+    //   print(r);
+    //   print(" ");
+    //   print(g);
+    //   print(" ");
+    //   print(b);
+    //   print(" ");
+    //    print(h);
+    //   print(" ");
+    //    print(huein);
 
-    println("");
+    //   println("");
     r = v;
     g = t;
     b = p;
     break;
   case 1:
-    println("1");
+    //   println("1");
     r = q;
     g = v;
     b = p;
     break;
   case 2:
-    println("2");
+    //    println("2");
     r = p;
     g = v;
     b = t;
     break;
 
   case 3:
-    println("3");
+    //    println("3");
     r = p;
     g = q;
     b = v;
     break;
   case 4:
-    println("4");
+    //    println("4");
     r = t;
     g = p;
     b = v;
     break;
   case 5:
-    println("5");
+    //    println("5");
   default:
     r = v;
     g = p;
@@ -103,17 +103,17 @@ int[][] interpolatedarray = new int[80*2][60*2];
 
 void renderrawimage() {
 
-      int xpos = 0;
-    int ypos = 0;
-    
+  int xpos = 0;
+  int ypos = 0;
+
   for (int i = 0; i < 80; i++) {
 
     for (int j = 0; j < 60; j++) {
 
       int col = rawarray[i][j];
-      
-     color c =  hsv2rgb(col);
-            
+
+      color c =  hsv2rgb(col);
+
       noStroke(); //prevents visible borders on squares
 
       fill(c);
@@ -134,120 +134,130 @@ void renderrawimage() {
   }
 }
 
-void populateinterpolatedarray(){
-  
+void populateinterpolatedarray() {
+
   for (int i = 0; i < 80; i++) {
-  
-  
+
+    print("1: ");
     for (int j = 0; j < 60; j++) {
-  
-     
-    
+
+
+
       int col;
-      
-   //   if (j<60)
- col = rawarray[i][j]; //Get "Raw" value
- //     else
- //col = rawarray[i][0]; //Get "Raw" value
-      
-      
-     // interpolatedarray[i][j] = col; //set raw value (this does not change)
-      
+
+      //   if (j<60)
+      col = rawarray[i][j]; //Get "Raw" value
+      //     else
+      //col = rawarray[i][0]; //Get "Raw" value
+
+
+      // interpolatedarray[i][j] = col; //set raw value (this does not change)
+
       //Interpolate:
       //scale new points to correct range:
-      int newx = i*2;
-      int newy = j*1;
-       interpolatedarray[newx][newy] = col;
-    //   interpolatedarray[newx][newy+1] = 255;
-      // interpolatedarray[newx+1][newy] = 255;
- 
-      
-      
-    // color c =  hsv2rgb(col);
+      int newx = i*1;
+      int newy = j*2;
 
+      interpolatedarray[newx][newy] = col;
+      //  interpolatedarray[newx][newy+1] = col;
+      //  interpolatedarray[newx+1][newy] = col;
+      // interpolatedarray[newx+1][newy+1] = col;
+
+
+      print(col);
+      print(" ");
+
+      // color c =  hsv2rgb(col);
     }
-}
+    println("1*");
+  }
 }
 
-  void renderinterpolatedimage() {
-     //first, populate the interpolated array:
-        populateinterpolatedarray();
-        
-    int xpos = 0;
-    int ypos = 0;
-    
- int resx = 80*2;
- int resy = 60*2;
-    
+void renderinterpolatedimage() {
+  //first, populate the interpolated array:
+  populateinterpolatedarray();
+
+  int xpos = 0;
+  int ypos = 0;
+
+  int resx = 80*2;
+  int resy = 60*2;
+
   for (int i = 0; i < resx; i++) {
-
+    print("2: ");
     for (int j = 0; j < resy; j++) {
 
       int col = interpolatedarray[i][j];
-      
-     color c =  hsv2rgb(col);
-            
+
+
+      print(col);
+      print(" ");
+
+      color c =  hsv2rgb(col);
+
       noStroke(); //prevents visible borders on squares
 
       fill(c);
       // println(col);
 
-      rect(xpos, ypos, 4, 4);
+      rect(xpos, ypos, incamount, incamount);
 
       xpos+=incamount;
 
-      if (xpos >=(resx*incamount)) {
+      if (xpos >=(resx*incamount)) 
+      {
         xpos = 0;
         ypos+=incamount;
       }
 
       if (ypos >= (resy*incamount))
+      {
         ypos = 0;
+      }
+      println("2*");
     }
   }
-     
+}
+
+
+void setup() {
+  size(690, 500);
+
+  String lines[] = loadStrings("output.txt"); 
+
+  String image = "";
+  for (int i = 0; i < lines.length; i++) {
+    //println(lines[i]);
+    image = image + lines[i];
   }
 
-  void setup() {
-    size(690, 500);
+  int xpos = 0;
+  int ypos = 0;
 
-    String lines[] = loadStrings("output.txt"); 
+  int count = 0;
 
-    String image = "";
-    for (int i = 0; i < lines.length; i++) {
-      //println(lines[i]);
-      image = image + lines[i];
-    }
-
-int xpos = 0;
-int ypos = 0;
-
-    int count = 0;
-
-    int[] dataasint = int(split(image, ' '));
+  int[] dataasint = int(split(image, ' '));
 
   for (int i = 0; i < 80; i++) {
 
     for (int j = 0; j < 60; j++) {
-      
+
       int col = dataasint[count];
-      
+
       rawarray[i][j] = col;
-      
+
       count++;
-      
     }
-    
   }
 
-//renderrawimage();
-renderinterpolatedimage();
+  //renderrawimage();
+  renderinterpolatedimage();
   //  for (int i : dataasint) {   
-      // }
-      
-    println("COUNT: ");
+  // }
 
-    println(count);
+  println("COUNT: ");
 
-    println();
-  }
+  println(count);
+
+  println();
+}
