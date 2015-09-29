@@ -136,17 +136,34 @@ void renderrawimage() {
 
 void populateinterpolatedarray(){
   
-  for (int i = 0; i < 80*2; i+=2) {
-
-    for (int j = 0; j < 60*2; j+=2) {
-
-      int col = rawarray[i][j];
+  for (int i = 0; i < 80; i++) {
+  
+  
+    for (int j = 0; j < 60; j++) {
+  
+     
+    
+      int col;
       
-      interpolatedarray[i][j] = col;
-       interpolatedarray[i+1][j+1] = 255;
+   //   if (j<60)
+ col = rawarray[i][j]; //Get "Raw" value
+ //     else
+ //col = rawarray[i][0]; //Get "Raw" value
       
       
-     color c =  hsv2rgb(col);
+     // interpolatedarray[i][j] = col; //set raw value (this does not change)
+      
+      //Interpolate:
+      //scale new points to correct range:
+      int newx = i*2;
+      int newy = j*1;
+       interpolatedarray[newx][newy] = col;
+    //   interpolatedarray[newx][newy+1] = 255;
+      // interpolatedarray[newx+1][newy] = 255;
+ 
+      
+      
+    // color c =  hsv2rgb(col);
 
     }
 }
@@ -159,11 +176,12 @@ void populateinterpolatedarray(){
     int xpos = 0;
     int ypos = 0;
     
- 
+ int resx = 80*2;
+ int resy = 60*2;
     
-  for (int i = 0; i < 80*2; i++) {
+  for (int i = 0; i < resx; i++) {
 
-    for (int j = 0; j < 60*2; j++) {
+    for (int j = 0; j < resy; j++) {
 
       int col = interpolatedarray[i][j];
       
@@ -178,12 +196,12 @@ void populateinterpolatedarray(){
 
       xpos+=incamount;
 
-      if (xpos >=(80*incamount)) {
+      if (xpos >=(resx*incamount)) {
         xpos = 0;
         ypos+=incamount;
       }
 
-      if (ypos >= (60*incamount))
+      if (ypos >= (resy*incamount))
         ypos = 0;
     }
   }
@@ -191,7 +209,7 @@ void populateinterpolatedarray(){
   }
 
   void setup() {
-    size(640, 480);
+    size(690, 500);
 
     String lines[] = loadStrings("output.txt"); 
 
