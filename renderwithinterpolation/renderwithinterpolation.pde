@@ -204,25 +204,61 @@ void renderinterpolatedimage() {
     print("2: ");
     for (int j = 0; j < 60; j++) {
 
-      int col = rawarray[i][j];//interpolatedarray[i][j];
+     // int col = rawarray[i][j];//interpolatedarray[i][j];
 
+    //  print(col);
+    //  print(" ");
 
-      print(col);
-      print(" ");
+    //  color c =  hsv2rgb(col);
+      
+         noStroke(); //prevents visible borders on squares
+         
+      //Grab neighbouring values:
+    int value1 = rawarray[i][j];  
+     
+     int ix = i;
+     int iy = j;
+     
+     if(ix >=79)
+     ix = 78;
+     
+     if(iy >=59)
+     iy = 58;
+     
+     int value2 = rawarray[ix][iy+1];    
+     int value3 = 90;//rawarray[ix+1][iy];   
+     int value4 = 90;//rawarray[ix+1][iy+1];
 
-      color c =  hsv2rgb(col);
+    int ivalue1 = (value1+value2)/2;
+    int ivalue2 = (value1+value3)/2;
+    int ivalue3 = (value1+value4)/2;
 
-        noStroke(); //prevents visible borders on squares
-     // stroke(c);
-      fill(c);
-      // println(col);
-      //noSmooth();
-      //point(i,j);
+print(value1);
+print(" ");
+print(value2);
+print(" ");
+print(value3);
+print(" ");
+print(value4);
+print(" ");
+print(ivalue1);
+print(" ");
+print(ivalue2);
+print(" ");
+print(ivalue3);
+println("");
 
-      rect(xpos, ypos, incamount/2,incamount/2);
-       rect(xpos+2, ypos, incamount/2, incamount/2);
-         rect(xpos, ypos+2, incamount/2, incamount/2);
-            rect(xpos+2, ypos+2, incamount/2, incamount/2);
+      fill(hsv2rgb(value1));
+     rect(xpos, ypos, incamount/2,incamount/2);
+      
+     fill(hsv2rgb(ivalue1));
+     rect(xpos+2, ypos, incamount/2, incamount/2);
+       
+       fill(hsv2rgb(ivalue2));
+       rect(xpos, ypos+2, incamount/2, incamount/2);
+       
+        fill(hsv2rgb(ivalue3));
+           rect(xpos+2, ypos+2, incamount/2, incamount/2);
 
     //  xpos++;
 
