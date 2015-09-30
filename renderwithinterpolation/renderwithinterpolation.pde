@@ -95,7 +95,7 @@ color hsv2rgb(int huein)
   return out;
 }
 
-int incamount = 4;
+
 
 int[][] rawarray = new int[80][60];
 int[][] interpolatedarray = new int[80*2][60*2];
@@ -145,8 +145,21 @@ void populateinterpolatedarray() {
 
       int col;
 
+      int ix = 0;
+      int iy = 0;
+
+      if (i < 80 && j < 60) {
+        ix = i;
+        iy = j;
+        col = rawarray[ix][iy]; //Get "Raw" value
+      } else {
+        col = 0;
+      }
+      col = rawarray[i][j]; //Get 
+
+
       //   if (j<60)
-      col = rawarray[i][j]; //Get "Raw" value
+      //  col = rawarray[ix][iy]; //Get "Raw" value
       //     else
       //col = rawarray[i][0]; //Get "Raw" value
 
@@ -156,7 +169,7 @@ void populateinterpolatedarray() {
       //Interpolate:
       //scale new points to correct range:
       int newx = i*1;
-      int newy = j*2;
+      int newy = j*1;
 
       interpolatedarray[newx][newy] = col;
       //  interpolatedarray[newx][newy+1] = col;
@@ -173,9 +186,13 @@ void populateinterpolatedarray() {
   }
 }
 
+int incamount = 4;
 void renderinterpolatedimage() {
   //first, populate the interpolated array:
-  populateinterpolatedarray();
+  //populateinterpolatedarray();
+
+
+  //interpolatedarray = (int[][]) expand(rawarray);
 
   int xpos = 0;
   int ypos = 0;
@@ -183,11 +200,11 @@ void renderinterpolatedimage() {
   int resx = 80*2;
   int resy = 60*2;
 
-  for (int i = 0; i < resx; i++) {
+  for (int i = 0; i < 80; i++) {
     print("2: ");
-    for (int j = 0; j < resy; j++) {
+    for (int j = 0; j < 60; j++) {
 
-      int col = interpolatedarray[i][j];
+      int col = rawarray[i][j];//interpolatedarray[i][j];
 
 
       print(col);
@@ -195,33 +212,41 @@ void renderinterpolatedimage() {
 
       color c =  hsv2rgb(col);
 
-      noStroke(); //prevents visible borders on squares
-
+        noStroke(); //prevents visible borders on squares
+     // stroke(c);
       fill(c);
       // println(col);
+      //noSmooth();
+      //point(i,j);
 
-      rect(xpos, ypos, incamount, incamount);
+      rect(xpos, ypos, incamount/2,incamount/2);
+       rect(xpos+2, ypos, incamount/2, incamount/2);
+         rect(xpos, ypos+2, incamount/2, incamount/2);
+            rect(xpos+2, ypos+2, incamount/2, incamount/2);
+
+    //  xpos++;
+
+      //   rect(xpos+1, ypos, 4, 4);
 
       xpos+=incamount;
 
-      if (xpos >=(resx*incamount)) 
-      {
+      if (xpos >=(80*incamount)) {
         xpos = 0;
         ypos+=incamount;
       }
 
-      if (ypos >= (resy*incamount))
-      {
+      if (ypos >= (60*incamount))
         ypos = 0;
-      }
-      println("2*");
     }
+    
+    
+    println("2*");
   }
 }
 
 
 void setup() {
-  size(690, 500);
+  size(1024, 768);
 
   String lines[] = loadStrings("output.txt"); 
 
@@ -250,7 +275,7 @@ void setup() {
     }
   }
 
-  //renderrawimage();
+//  renderrawimage();
   renderinterpolatedimage();
   //  for (int i : dataasint) {   
   // }
