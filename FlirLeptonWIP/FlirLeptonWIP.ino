@@ -48,7 +48,7 @@ void setup()
 
   pinMode(saveimagepin, INPUT);
 
-  attachInterrupt(digitalPinToInterrupt(7),saveimage,RISING);
+  attachInterrupt(digitalPinToInterrupt(7), saveimage, RISING);
 
   Serial.println("setup complete");
 
@@ -149,7 +149,7 @@ void buffer_image(void)
   {
     image[i][j] = ((lepton_frame_packet[2 * i + 4] << 8) + lepton_frame_packet[2 * i + 5]); //-0x1000;
   }
-  if (j == 0x3B ){//&& savenewimage == 1) {
+  if (j == 0x3B ) { //&& savenewimage == 1) {
     print_image();
     scale_image();
     donecapturing = 1;
@@ -397,20 +397,20 @@ void captureimage() {
 
 volatile int state = LOW;
 
-void saveimage(){
+void saveimage() {
 
- Serial.println("SAVING IMAGE");
+  Serial.println("SAVING IMAGE");
 
-state = HIGH;
- //  while (1) {
+  state = HIGH;
+  //  while (1) {
 
   //  read_lepton_frame();
 
 
- //buffer_image();
+  //buffer_image();
 
 
- // }
+  // }
 
 }
 
@@ -418,39 +418,39 @@ state = HIGH;
 void loop()
 {
   //lepton_sync();
-  delay(2500);
- // return;
+ // delay(2500);
+  // return;
   // lepton_sync();
-  if(state == HIGH){
-  
+  if (state == HIGH) {
+ //lepton_sync();
 
-//lepton_sync();
-//delay(500);
-   // delay(2500);
-      state = LOW;
+    lepton_sync();
+    delay(250);
+    // delay(2500);
+    state = LOW;
     donecapturing = 0;
-  while (donecapturing == 0) {
-    //   delay(1000);
-    //captureimage();
+    while (donecapturing == 0) {
+      //   delay(1000);
+      //captureimage();
+
+     // scale
+      read_lepton_frame();
+      // if(lepton_frame_packet[0]&0x0f == 0x0f )
+      {
 
 
-    read_lepton_frame();
-    // if(lepton_frame_packet[0]&0x0f == 0x0f )
-    {
-
-
-    //  buttonState = digitalRead(saveimagepin);
-      /*
-      if (buttonState != lastbuttonState && buttonState == HIGH) {      
-        Serial.println("SAVING IMAGE");
+        //  buttonState = digitalRead(saveimagepin);
+        /*
+        if (buttonState != lastbuttonState && buttonState == HIGH) {
+          Serial.println("SAVING IMAGE");
+          buffer_image();
+        }
+        lastbuttonState = buttonState;
+        */
         buffer_image();
-      }
-      lastbuttonState = buttonState;
-      */
- buffer_image();
 
+      }
     }
-  }
   }
 }
 
