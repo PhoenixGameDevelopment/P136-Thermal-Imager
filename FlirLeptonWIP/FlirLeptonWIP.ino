@@ -1,6 +1,33 @@
 #include <Wire.h>
 #include <SPI.h>
 
+
+//TFT Screen:
+#include "Adafruit_GFX.h"
+#include "Adafruit_ILI9340.h"
+
+#if defined(__SAM3X8E__)
+#undef __FlashStringHelper::F(string_literal)
+#define F(string_literal) string_literal
+#endif
+
+// These are the pins used for the UNO
+// for Due/Mega/Leonardo use the hardware SPI pins (which are different)
+#define _sclk 13
+#define _miso 12
+#define _mosi 11
+#define _cs 4//10
+#define _dc 3//9
+#define _rst 2//8
+
+// Using software SPI is really not suggested, its incredibly slow
+//Adafruit_ILI9340 tft = Adafruit_ILI9340(_cs, _dc, _mosi, _sclk, _rst, _miso);
+// Use hardware SPI
+//Adafruit_ILI9340 tft = Adafruit_ILI9340(_cs, _dc, _rst);
+
+
+
+
 byte x = 0;
 #define ADDRESS  (0x2A)
 
@@ -52,6 +79,7 @@ void setup()
 
   Serial.println("setup complete");
 
+//tft.begin();
 
   read_reg(0x2);
 
@@ -142,6 +170,18 @@ bool donecapturing = 0;
 
 bool savenewimage = 0;
 
+void testdrawpoints() {
+
+  int border = 12;
+  for (int i = border; i < 60 + border; i++) {
+    for (int j = border; j < 80 + border; j++) {
+    //  tft.drawPixel(i*2, j*2, 255);
+ //   tft.drawRect(i*3, j*3,3,3, 255);
+    }
+  }
+}
+
+
 void buffer_image(void)
 {
   int j = lepton_frame_packet[1];
@@ -202,8 +242,13 @@ void scale_image(void)
     {
       int num = scale(image[i][j]);
       //Serial.print(image[i][j],DEC);
+
+
+      
       Serial.print(num, DEC);
       Serial.print(" ");
+//    tft.drawRect(i*3,j*3,3,3,128);
+      
     }
   }
   Serial.println();
@@ -421,10 +466,10 @@ void loop()
  // delay(2500);
   // return;
   // lepton_sync();
-  if (state == HIGH) {
+ // if (state == HIGH) {
  //lepton_sync();
 
-    lepton_sync();
+ //   lepton_sync();
     delay(250);
     // delay(2500);
     state = LOW;
@@ -450,7 +495,8 @@ void loop()
         buffer_image();
 
       }
-    }
+    //}
   }
+  while(1){};
 }
 
