@@ -1,6 +1,7 @@
 #include <Wire.h>
 #include <SPI.h>
 
+#include <math.h>
 
 //TFT Screen:
 #include "Adafruit_GFX.h"
@@ -59,6 +60,8 @@ int image_index;
 #define image_y (60)
 word image[image_x][image_y];
 
+int R = 0, G = 0, B = 0;
+
 void setup()
 {
   //pinMode(pin, INPUT);           // set pin to input
@@ -79,7 +82,7 @@ void setup()
 
   Serial.println("setup complete");
 
-//tft.begin();
+  //tft.begin();
 
   read_reg(0x2);
 
@@ -175,8 +178,8 @@ void testdrawpoints() {
   int border = 12;
   for (int i = border; i < 60 + border; i++) {
     for (int j = border; j < 80 + border; j++) {
-    //  tft.drawPixel(i*2, j*2, 255);
- //   tft.drawRect(i*3, j*3,3,3, 255);
+      //  tft.drawPixel(i*2, j*2, 255);
+      //   tft.drawRect(i*3, j*3,3,3, 255);
     }
   }
 }
@@ -234,8 +237,88 @@ int scale(int num) {
   return ret;
 }
 */
+
+
+void hsvl2rgb(float H, float L)
+{
+ // Serial.println(H);
+  // H=0.28;
+  int var_i;
+  float S = 1, V, lightness, var_1, var_2, var_3, var_h, var_r, var_g, var_b;
+
+  V = L * 2;                         // For the "darkness" of the LED
+  if ( V > 1 ) V = 1;
+
+  if ( S == 0 )                      //HSV values = 0 ÷ 1
+  {
+    R = round(V * 255);
+    G = round(V * 255);
+    B = round(V * 255);
+  }
+  else
+  {
+    var_h = H * 6;
+    if ( var_h == 6 ) var_h = 0;  //H must be < 1
+    var_i = int( var_h ) ;            //Or ... var_i = floor( var_h )
+    var_1 = V * ( 1 - S );
+    var_2 = V * ( 1 - S * ( var_h - var_i ) );
+    var_3 = V * ( 1 - S * ( 1 - ( var_h - var_i ) ) );
+
+    if ( var_i == 0 ) {
+      var_r = V     ;
+      var_g = var_3 ;
+      var_b = var_1 ;
+    }
+    else if ( var_i == 1 ) {
+      var_r = var_2 ;
+      var_g = V     ;
+      var_b = var_1 ;
+    }
+    else if ( var_i == 2 ) {
+      var_r = var_1 ;
+      var_g = V     ;
+      var_b = var_3 ;
+    }
+    else if ( var_i == 3 ) {
+      var_r = var_1 ;
+      var_g = var_2 ;
+      var_b = V     ;
+    }
+    else if ( var_i == 4 ) {
+      var_r = var_3 ;
+      var_g = var_1 ;
+      var_b = V     ;
+    }
+    else {
+      var_r = V     ;
+      var_g = var_1 ;
+      var_b = var_2 ;
+    }
+
+    if ( L > 0.5 )         // Adjusting the Lightness (whiteness)
+    {
+      lightness = ( L - 0.5 ) / 0.5;
+      var_r += ( lightness * ( 1 - var_r ) );
+      var_g += ( lightness * ( 1 - var_g ) );
+      var_b += ( lightness * ( 1 - var_b ) );
+    }
+
+    R = round((1 - var_r) * 255);   // RGB results = 0 ÷ 255. Reversed for common anode RGB LED's
+    G = round((1 - var_g) * 255);
+    B = round((1 - var_b) * 255);
+  }
+}
+
+
+
 void scale_image(void)
 {
+  delay(250);
+  Adafruit_ILI9340 tft = Adafruit_ILI9340(_cs, _dc, _rst);
+  delay(250);
+  tft.begin();
+  delay(250);
+
   for (int j = 0; j < image_y; j++)
   {
     for (int i = 0; i < image_x; i++)
@@ -243,12 +326,22 @@ void scale_image(void)
       int num = scale(image[i][j]);
       //Serial.print(image[i][j],DEC);
 
+      //Color c = Color.HSBtoRGB(num,0.5,0.5);
 
-      
       Serial.print(num, DEC);
       Serial.print(" ");
-//    tft.drawRect(i*3,j*3,3,3,128);
-      
+      //   tft.drawRect(j*4+15,i*4+15,4,4,6);
+
+      //convert num to the correct scale:
+      float col = (((num - 0) * (1.0 - 0.0)) / (255 - 0)) + 0.0;
+      //int col = num;
+
+      hsvl2rgb(col, 0.5);
+
+      //  tft.fill(127,127,127);
+      //int colval = tft.Color565(0,255,0);
+      int colval = tft.Color565(R, G, B);
+      tft.drawRect(j * 3 + 15, i * 3 + 15, 3, 3, colval);
     }
   }
   Serial.println();
@@ -463,40 +556,41 @@ void saveimage() {
 void loop()
 {
   //lepton_sync();
- // delay(2500);
+  // delay(2500);
   // return;
   // lepton_sync();
- // if (state == HIGH) {
- //lepton_sync();
+  // if (state == HIGH) {
+  //lepton_sync();
 
- //   lepton_sync();
-    delay(250);
-    // delay(2500);
-    state = LOW;
-    donecapturing = 0;
-    while (donecapturing == 0) {
-      //   delay(1000);
-      //captureimage();
+  //   lepton_sync();
+  delay(250);
+  // delay(2500);
+  state = LOW;
+  donecapturing = 0;
+  while (donecapturing == 0) {
+    //   delay(1000);
+    //captureimage();
 
-     // scale
-      read_lepton_frame();
-      // if(lepton_frame_packet[0]&0x0f == 0x0f )
-      {
+    // scale
+    read_lepton_frame();
+    // if(lepton_frame_packet[0]&0x0f == 0x0f )
+    {
 
 
-        //  buttonState = digitalRead(saveimagepin);
-        /*
-        if (buttonState != lastbuttonState && buttonState == HIGH) {
-          Serial.println("SAVING IMAGE");
-          buffer_image();
-        }
-        lastbuttonState = buttonState;
-        */
+      //  buttonState = digitalRead(saveimagepin);
+      /*
+      if (buttonState != lastbuttonState && buttonState == HIGH) {
+        Serial.println("SAVING IMAGE");
         buffer_image();
-
       }
+      lastbuttonState = buttonState;
+      */
+      buffer_image();
+
+
+    }
     //}
   }
-  while(1){};
+  while (1) {};
 }
 
