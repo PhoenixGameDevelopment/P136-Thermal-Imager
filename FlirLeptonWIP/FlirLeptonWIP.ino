@@ -336,6 +336,18 @@ void scale_image(void)
       float col = (((num - 0) * (1.0 - 0.0)) / (255 - 0)) + 0.0;
       //int col = num;
 
+   //   Serial.print(col, DEC);
+   //   Serial.print(" ");
+
+     // Serial.print("255");
+//int t = 255;
+//int h = 0;
+//Serial.print("1 ");
+//      Serial.print((((t - 0) * (1.0 - 0.0)) / (255 - 0)) + 0.0);
+//      Serial.print(" ");
+//            Serial.print((((h - 0) * (1.0 - 0.0)) / (255 - 0)) + 0.0);
+//Serial.print(" ");
+
       hsvl2rgb(col, 0.5);
 
       //  tft.fill(127,127,127);
