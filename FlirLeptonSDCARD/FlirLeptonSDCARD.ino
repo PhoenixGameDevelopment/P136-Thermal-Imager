@@ -1,5 +1,6 @@
 #include <Wire.h>
 #include <SPI.h>
+#include <SD.h>
 
 #include <math.h>
 
@@ -20,6 +21,7 @@
 #define _cs 4//10
 #define _dc 3//9
 #define _rst 2//8
+#define SD_CS 5
 
 // Using software SPI is really not suggested, its incredibly slow
 //Adafruit_ILI9340 tft = Adafruit_ILI9340(_cs, _dc, _mosi, _sclk, _rst, _miso);
@@ -241,7 +243,7 @@ int scale(int num) {
 
 void hsvl2rgb(float H, float L)
 {
- // Serial.println(H);
+  // Serial.println(H);
   // H=0.28;
   int var_i;
   float S = 1, V, lightness, var_1, var_2, var_3, var_h, var_r, var_g, var_b;
@@ -319,6 +321,48 @@ void scale_image(void)
   tft.begin();
   delay(250);
 
+  File    saveFile;
+  if (!SD.begin(SD_CS)) {
+    Serial.println("failed!");
+    return;
+  }
+  else {
+    Serial.println("OK!");
+
+    //find most recent file number, and increment:
+    bool savefinished = 0;
+    int fileid = -1;
+char *filename = "";
+ String str = "";
+
+  Serial.println("FILE: ");
+    while (savefinished == 0) {
+      fileid++;
+      char b[2];
+      str = "output" + String(fileid) + ".lrf";
+
+    //  char charBuf[50];
+    //  str.toCharArray(charBuf,50);
+      Serial.println(str); 
+   //   filename = "output" + str.toCharArray(b,2) + ".lrf";
+ //filename = str.c_str();
+
+      if ((saveFile = SD.open(str)) == NULL) {
+        Serial.println("File not found"); //create
+        savefinished = 1;
+     }
+     else //If file is found, close, don't overwrite:
+     saveFile.close();
+
+
+    }
+
+ Serial.println(str); 
+
+
+ 
+  }
+
   for (int j = 0; j < image_y; j++)
   {
     for (int i = 0; i < image_x; i++)
@@ -336,24 +380,31 @@ void scale_image(void)
       float col = (((num - 0) * (1.0 - 0.0)) / (255 - 0)) + 0.0;
       //int col = num;
 
-   //   Serial.print(col, DEC);
-   //   Serial.print(" ");
+      //   Serial.print(col, DEC);
+      //   Serial.print(" ");
 
-     // Serial.print("255");
-//int t = 255;
-//int h = 0;
-//Serial.print("1 ");
-//      Serial.print((((t - 0) * (1.0 - 0.0)) / (255 - 0)) + 0.0);
-//      Serial.print(" ");
-//            Serial.print((((h - 0) * (1.0 - 0.0)) / (255 - 0)) + 0.0);
-//Serial.print(" ");
+      // Serial.print("255");
+      //int t = 255;
+      //int h = 0;
+      //Serial.print("1 ");
+      //      Serial.print((((t - 0) * (1.0 - 0.0)) / (255 - 0)) + 0.0);
+      //      Serial.print(" ");
+      //            Serial.print((((h - 0) * (1.0 - 0.0)) / (255 - 0)) + 0.0);
+      //Serial.print(" ");
 
       hsvl2rgb(col, 0.5);
 
       //  tft.fill(127,127,127);
       //int colval = tft.Color565(0,255,0);
       int colval = tft.Color565(R, G, B);
-      tft.drawRect(j * 3 + 15, i * 3 + 15, 3, 3, colval);
+      // tft.drawRect(j * 4 + 20, i * 4 + 20, 4, 4, colval);
+      tft.drawRect(j * 4, i * 4 , 4, 4, colval);
+
+      if(saveFile){
+        saveFile.print(num,DEC);
+        saveFile.print(" ");
+      }
+      
     }
   }
   Serial.println();
