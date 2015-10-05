@@ -372,8 +372,8 @@ char *filename = "";
 
       //Color c = Color.HSBtoRGB(num,0.5,0.5);
 
-      Serial.print(num, DEC);
-      Serial.print(" ");
+  //    Serial.print(num, DEC);
+ //     Serial.print(" ");
       //   tft.drawRect(j*4+15,i*4+15,4,4,6);
 
       //convert num to the correct scale:
