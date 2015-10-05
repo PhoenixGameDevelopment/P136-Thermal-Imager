@@ -356,7 +356,7 @@ char *filename = "";
 
 
     }
-
+ saveFile = SD.open(str,FILE_WRITE);
  Serial.println(str); 
 
 
@@ -404,10 +404,13 @@ char *filename = "";
         saveFile.print(num,DEC);
         saveFile.print(" ");
       }
+      else
+      Serial.print("Error!");
       
     }
   }
   Serial.println();
+  saveFile.close();
 }
 
 void print_image(void)
