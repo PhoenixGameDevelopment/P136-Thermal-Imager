@@ -368,9 +368,6 @@ char *filename = "";
     for (int i = 0; i < image_x; i++)
     {
       int num = scale(image[i][j]);
-      //Serial.print(image[i][j],DEC);
-
-      //Color c = Color.HSBtoRGB(num,0.5,0.5);
 
   //    Serial.print(num, DEC);
  //     Serial.print(" ");
